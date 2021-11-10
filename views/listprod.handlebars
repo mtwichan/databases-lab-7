@@ -1,0 +1,31 @@
+<h1 align="center">{{title}}</h1>
+<h2>Browse Products By Category and Search by Product Name</h2>
+
+<h2>All Products</h2>
+<form action="" method="get">
+  <select name="category" id="category">
+    {{#each categoryNames.recordset}}
+    <option value="{{this.categoryName}}">{{this.categoryName}}</option>
+    {{/each}}
+  </select>
+  <input type="text" id="productName" name="productName"><br><br>
+  <input type="submit" value="Submit"></input>
+  <input type="reset" value="Reset"></button>
+</form>
+
+<table>
+  <tr>
+    <th> </th>
+    <th>Product Name</th>
+    <th>Category</th>
+    <th>Price</th>
+  </tr>
+  {{#each productData.recordset}}
+  <tr>
+    <td><a href="{{this.url}}">Add to Cart</a></td>
+    <td>{{this.productName}}</td>
+    <td>{{this.categoryName}}</td>
+    <td>{{this.price}}</td>
+  </tr>
+  {{/each}}
+</table>

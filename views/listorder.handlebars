@@ -1,0 +1,37 @@
+<h1 align="center">{{title}}</h1>
+
+{{#each orderData}}
+<table>
+  <tr>
+    <th>Order Id</th>
+    <th>Order Date</th>
+    <th>Customer Id</th>
+    <th>Customer Name</th>
+    <th>Total Amount</th>
+  </tr>
+  <tr>
+    <td>{{this.orderSummary.orderId}}</td>
+    <td>{{this.orderSummary.orderDate}}</td>
+    <td>{{this.orderSummary.customerId}}</td>
+    <td>{{this.orderSummary.customerName}}</td>
+    <td>{{this.orderSummary.totalAmount}}</td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <th>Product Id</th>
+    <th>Quantity</th>
+    <th>Price</th>
+  </tr>
+  {{#each this.orderProduct}}
+    {{#each .}}
+    <tr>
+        <td>{{this.productId}}</td>
+        <td>{{this.quantity}}</td>
+        <td>{{this.price}}</td>
+    </tr>
+    {{/each}}
+  {{/each}}
+</table>
+{{/each}}

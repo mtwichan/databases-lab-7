@@ -1,1 +1,0 @@
-# databases-lab-7
