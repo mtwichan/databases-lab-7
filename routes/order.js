@@ -1,29 +1,87 @@
-const express = require('express');
-const router = express.Router();
-const sql = require('mssql');
-const moment = require('moment');
+const express = require("express")
+const router = express.Router()
+const sql = require("mssql")
+const moment = require("moment")
 
-router.get('/', function(req, res, next) {
-    res.setHeader('Content-Type', 'text/html');
-    res.write("<title>YOUR NAME Grocery Order Processing</title>");
+router.get("/", function (req, res, next) {
+  res.setHeader("Content-Type", "text/html")
+  res.write("<title>YOUR NAME Grocery Order Processing</title>")
 
-    let productList = false;
-    if (req.session.productList && req.session.productList.length > 0) {
-        productList = req.session.productList;
-    }
+  let productList = false
+  if (req.session.productList && req.session.productList.length > 0) {
+    productList = req.session.productList
+  }
 
-    /**
+  if (!productList) {
+    res.write("<h1>Error, empty shopping cart.</h1>")
+    res.end()
+    return
+  }
+
+  let customerId = req.query.customerId
+
+  let customerQuery = `SELECT * FROM customer WHERE customer.customerId = @customerID`
+  let orderQuery = `INSERT INTO ordersummary (customerId, orderDate, totalAmount) OUTPUT INSERTED.orderId VALUES (@customerId, @orderDate, @totalPrice)`
+  let productQuery = `INSERT INTO orderproduct (orderId, productId, quantity, price) VALUES (@orderId, @productId, @quantity, @price)`
+  // Query and generate tables
+  ;(() => {
+    let pool,
+      write = ""
+    /** Create connection, and validate that it connected successfully **/
+    // Start SQL pool
+    /** Create and validate connection **/
+    sql
+      .connect(dbConfig)
+      .then(p => {
+        pool = p
+        return pool.request().input("customerID", customerId).query(customerQuery)
+      })
+      .then(result => {
+        if (result.recordset.length === 1) {
+          let customer = result.recordset[0]
+          write += `<h1>${customer.firstName}'s Order</h1>\n`
+          let totalPrice = productList.filter(product => product).reduce((sum, product) => sum + product.price * product.quantity, 0)
+          return pool.request().input("customerId", customerId).input("orderDate", "2019-10-15 10:25:55").input("totalPrice", totalPrice).query(orderQuery)
+        } else {
+          throw "Invalid customerID"
+        }
+      })
+      .then(result => {
+        let orderId = result.recordset[0].orderId
+        productList
+          .filter(product => product)
+          .forEach(async product => {
+            try {
+              await pool.request().input("orderId", orderId).input("productId", product.id).input("quantity", product.quantity).input("price", product.price).query(productQuery)
+              write += `<h2>${product.name}</h2>\n`
+              write += `<h3>Quantity: ${product.quantity}, Price: ${product.price}</h3>\n`
+            } catch (err) {
+              console.dir(err)
+              write += `<h2>Error adding ${product.name} to order</h2>\n`
+            }
+          })
+        res.write(write)
+        req.session.destroy()
+        res.end()
+      })
+      .catch(err => {
+        console.dir(err)
+        res.write(err)
+        res.end()
+      })
+  })()
+
+  /**
     Determine if valid customer id was entered
     Determine if there are products in the shopping cart
     If either are not true, display an error message
     **/
 
-    /** Make connection and validate **/
+  /** Make connection and validate **/
 
-    /** Save order information to database**/
+  /** Save order information to database**/
 
-
-        /**
+  /**
         // Use retrieval of auto-generated keys.
         sqlQuery = "INSERT INTO <TABLE> OUTPUT INSERTED.orderId VALUES( ... )";
         let result = await pool.request()
@@ -33,13 +91,13 @@ router.get('/', function(req, res, next) {
         let orderId = result.recordset[0].orderId;
         **/
 
-    /** Insert each item into OrderedProduct table using OrderId from previous INSERT **/
+  /** Insert each item into OrderedProduct table using OrderId from previous INSERT **/
 
-    /** Update total amount for order record **/
+  /** Update total amount for order record **/
 
-    /** For each entry in the productList is an array with key values: id, name, quantity, price **/
+  /** For each entry in the productList is an array with key values: id, name, quantity, price **/
 
-    /**
+  /**
         for (let i = 0; i < productList.length; i++) {
             let product = products[i];
             if (!product) {
@@ -49,11 +107,9 @@ router.get('/', function(req, res, next) {
         }
     **/
 
-    /** Print out order summary **/
+  /** Print out order summary **/
 
-    /** Clear session/cart **/
+  /** Clear session/cart **/
+})
 
-    res.end();
-});
-
-module.exports = router;
+module.exports = router
