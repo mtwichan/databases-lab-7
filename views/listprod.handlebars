@@ -22,8 +22,8 @@
   </tr>
   {{#each productData.recordset}}
   <tr>
-    <td><a href="{{this.url}}">Add to Cart</a></td>
-    <td>{{this.productName}}</td>
+    <td><a href="{{this.urlAddCart}}">Add to Cart</a></td>
+    <td><a href="{{this.urlProduct}}">{{this.productName}}</a></td>
     <td>{{this.categoryName}}</td>
     <td>{{this.price}}</td>
   </tr>
