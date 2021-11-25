@@ -8,30 +8,16 @@ router.get("/", function (req, res, next) {
     productQuery,
     productResults,
     categoryNameQuery,
-    categoryNameResults;
+    categoryNameResults,
+    urlProductName,
+    urlCategory;
 
-  let urlProductName = req.query.productName;
-  let urlCategory = req.query.category;
+  urlProductName = req.query.productName;
+  urlCategory = req.query.category;
 
   if (urlCategory === "All") {
     urlCategory = undefined;
   }
-
-  console.log("Name >>>", urlProductName);
-  console.log("Category >>>", urlCategory);
-  /** $name now contains the search string the user entered
-     Use it to build a query and print out the results. **/
-
-  /** 
-    For each product create a link of the form
-    addcart?id=<productId>&name=<productName>&price=<productPrice>
-    **/
-
-  /**
-        Useful code for formatting currency:
-        let num = 2.89999;
-        num = num.toFixed(2);
-    **/
 
   // Queries
   productQuery =
@@ -56,14 +42,17 @@ router.get("/", function (req, res, next) {
 
       /** Print out the ResultSet **/
       // Add URL string
-      productResults.recordset.forEach((dictItem) => {
-        let urlString = `addcart?id=${dictItem.productId}&name=${
-          dictItem.productName
-        }&price=${dictItem.price.replace("$", "")}`;
-        dictItem["url"] = urlString;
+      let urlAddCart, urlProduct;
+      productResults.recordset.forEach((productRow) => {
+        urlAddCart = `addcart?id=${productRow.productId}&name=${
+          productRow.productName
+        }&price=${productRow.price.replace("$", "")}`;
+        urlProduct = `product?productId=${productRow.productId}`;
+
+        productRow["urlAddCart"] = urlAddCart;
+        productRow["urlProduct"] = urlProduct;
       });
 
-      //   console.log(productResults);
       res.render("listprod", {
         title: "Ray's Grocery",
         categoryNames: categoryNameResults,
