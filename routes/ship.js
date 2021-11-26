@@ -17,7 +17,6 @@ router.get("/", function (req, res, next) {
     "SELECT op.orderId, op.productId, op.quantity AS orderQuantity, pinv.quantity AS productQuantity FROM orderproduct op JOIN productinventory pinv ON op.productId = pinv.productId WHERE op.orderId = @orderId AND pinv.warehouseId = @warehouseId";
 
   let shipmentInsert = "INSERT INTO shipment (shipmentDate, shipmentDesc, warehouseId) values (@shipmentDate, @shipmentDesc, @warehouseId);"
-  let quantityUpdate = "update productinventory set quantity = @newquantity where productid = @pid;"
 
     sql.connect(dbConfig).then(p => {
       pool = p
@@ -26,12 +25,11 @@ router.get("/", function (req, res, next) {
     }).then(({recordset}) => {
       itemList = recordset
       return pool.request().input("orderId", orderId).input('warehouseId', 1).query(quantityQuery)
-    }).then((q) => {
-      let recordset = q.recordset
-      console.log(q)
+    }).then(({recordset}) => {
       recordset.forEach((quantity,idx) => {
         if(quantity.orderQuantity > quantity.productQuantity){
-          throw `Shipment not done. Insufficient inventory for product id: ${item.productId}`
+          res.write(write)
+          throw `Shipment not done. Insufficient inventory for product id: ${itemList[idx].productId}`
         }
         itemList[idx].orderQuantity = quantity.orderQuantity
         itemList[idx].productQuantity = quantity.productQuantity
