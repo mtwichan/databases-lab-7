@@ -1,5 +1,9 @@
 <h1 align="center">{{title}}</h1>
 
+<form method="POST">
+  <button>Load data</button>
+</form>
+
 <h2 align="center">Total Sales</h2>
 <table>
   <tr>
@@ -7,10 +11,10 @@
     <th>Total Sales</th>
   </tr>
   {{#each totalSalesData}}
-  <tr>
-    <td>{{this.orderDate}}</td>
-    <td>{{this.totalAmount}}</td>
-  </tr>
+    <tr>
+      <td>{{this.orderDate}}</td>
+      <td>{{this.totalAmount}}</td>
+    </tr>
   {{/each}}
 </table>
 
@@ -22,10 +26,10 @@
     <th>Last Name</th>
   </tr>
   {{#each customersData}}
-  <tr>
-    <td>{{this.customerId}}</td>
-    <td>{{this.firstName}}</td>
-    <td>{{this.lastName}}</td>
-  </tr>
+    <tr>
+      <td>{{this.customerId}}</td>
+      <td>{{this.firstName}}</td>
+      <td>{{this.lastName}}</td>
+    </tr>
   {{/each}}
 </table>
