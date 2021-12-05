@@ -4,129 +4,77 @@ const sql = require("mssql");
 const moment = require("moment");
 
 router.get("/", function (req, res, next) {
-  let orderId, itemsQuery, quantityQuery;
+  let orderId, itemsQuery, quantityQuery, pool, transaction, itemList, write = ''
 
+  res.setHeader("Content-Type", "text/html")
+  res.write("<title>YOUR NAME Grocery Order Processing</title>")
   // TODO: Get order id
   orderId = req.query.orderId;
-
-  // TODO: Check if valid order id
-  // if (Number.isInteger(orderId) === false) {
-  //   res.setHeader("Content-Type", "text/html");
-  //   res.write("Query invalid");
-  //   res.end();
-  //   // return;
-  // }
 
   itemsQuery =
     "SELECT p.productId FROM product p WHERE p.productId IN (SELECT op.productId FROM orderproduct AS op WHERE orderId = @orderId)";
   quantityQuery =
-    "SELECT op.orderId, op.productId, op.quantity AS orderQuantity, pinv.quantity AS productQuantity FROM orderproduct op JOIN productinventory pinv ON op.productId = pinv.productId WHERE op.orderId = @orderId AND pinv.warehouseId = @warehouseId AND pinv.productId IN (@productIdList)";
+    "SELECT op.orderId, op.productId, op.quantity AS orderQuantity, pinv.quantity AS productQuantity FROM orderproduct op JOIN productinventory pinv ON op.productId = pinv.productId WHERE op.orderId = @orderId AND pinv.warehouseId = @warehouseId";
 
-  (async function () {
-    try {
-      let pool = await sql.connect(dbConfig);
-      const transaction = pool.transaction();
-      const request = transaction
-        .request()
-        .input("orderId", sql.Int, orderId)
-        .input("warehouseId", sql.Int, 1);
+  let shipmentInsert = "INSERT INTO shipment (shipmentDate, shipmentDesc, warehouseId) values (@shipmentDate, @shipmentDesc, @warehouseId);"
 
-      // TODO: Retrieve all items in order with given id
-      let itemResult = await pool
-        .request()
-        .input("orderId", sql.Int, orderId)
-        .query(itemsQuery);
-      let itemProductIds = [];
-      itemResult.recordset.forEach((ele) => {
-        itemProductIds.push(ele.productId);
-      });
-
-      let quantityResult = await pool
-        .request()
-        .input("productIdList", 1)
-        .input("orderId", sql.Int, orderId)
-        .input("warehouseId", sql.Int, 1)
-        .query(quantityQuery);
-
-      console.log("quantityResult >>>", quantityResult);
-
-      // console.log(itemProductIds);
-      // // TODO: Start a transaction
-      // // Transaction 1:
-      transaction.begin((err) => {
-        let rolledBack = false;
-        transaction.on("rollback", (aborted) => {
-          console.log("rollback triggered >>>");
-          rolledBack = true;
-        });
-
-        let m = new Date();
-        let dateString =
-          m.getUTCFullYear() +
-          "-" +
-          (m.getUTCMonth() + 1) +
-          "-" +
-          m.getUTCDate();
-        request.query(
-          `INSERT INTO shipment (shipmentDate, shipmentDesc, warehouseId) VALUES ('${dateString}', 'shipment', 1)`,
-          (err, results) => {
-            if (err) {
-              if (!rolledBack) {
-                transaction.rollback((err) => {
-                  // ... error checks                  
-                  console.log("rollback fired transcation 1 >>>", err);
-                });
-              }
-            } else {
-              transaction.commit((_) => {
-                // ... error checks
-                console.log("commit fired transcation 1 >>>");
-              });
-            }
+    sql.connect(dbConfig).then(p => {
+      pool = p
+      transaction = pool.transaction()
+      return pool.request().input("orderId", orderId).query(itemsQuery)
+    }).then(({recordset}) => {
+      itemList = recordset
+      return pool.request().input("orderId", orderId).input('warehouseId', 1).query(quantityQuery)
+    }).then(({recordset}) => {
+      recordset.forEach((quantity,idx) => {
+        if(quantity.orderQuantity > quantity.productQuantity){
+          res.write(write)
+          throw `Shipment not done. Insufficient inventory for product id: ${itemList[idx].productId}`
+        }
+        itemList[idx].orderQuantity = quantity.orderQuantity
+        itemList[idx].productQuantity = quantity.productQuantity
+        write+=`<p>Ordered product: ${itemList[idx].productId} Qty: ${itemList[idx].orderQuantity} Previous inventory: ${itemList[idx].productQuantity} New inventory: ${itemList[idx].productQuantity - itemList[idx].orderQuantity}</p>\n`
+      })
+      return pool.request().input('shipmentDate', moment(new Date()).format("YYYY-MM-DD HH:mm:ss")).input('shipmentDesc', `The shipment for order ${orderId}`).input("warehouseId", 1).query(shipmentInsert)
+    }).then(() => {
+      transaction.begin(async err => {
+        let request = new sql.Request(transaction)
+        if(err){
+          throw err
+        }
+        let rolledBack = false
+        itemList.forEach(async (item) => {
+          if(!rolledBack){
+            await new Promise(resolve => {
+              request.query(`update orderproduct set quantity = ${item.productQuantity - item.orderQuantity} where productid = ${item.productId};`, (err, result => {
+                if(err){
+                  rolledBack = err 
+                }
+                resolve()
+              }))
+            })
           }
-        );
-      });
+        })
 
-      // Transaction 2: Am unable to run multiple queries inside a transcation albiet synchronously...
-      // transaction.begin((err) => {
-      //   let rolledBack = false;
+        if(!rolledBack){
+          write+="<h4>Shipment successfully processed.</h4>\n"
+          transaction.commit(err => {
+            if(err) throw err
+            res.write(write)
+            res.end()
+          })
+        } else {
+          transaction.rollback()
+          throw rolledBack
+        }
 
-      //   transaction.on("rollback", (aborted) => {
-      //     console.log("rollback triggered >>>");
-      //     rolledBack = true;
-      //   });
+      })
+    }).catch(err => {
+      console.error(err)
+      res.write(err)
+      res.end()
+    })
 
-      //   for (let ele of quantityResult.recordset) {
-      //     if (ele.productQuantity < ele.orderQuantity) {
-      //       rolledBack = true;
-      //       break;
-      //     }
-      //      request.input("productQuantity", sql.Int, ele.productQuantity - ele.orderQuantity).input("productId", sql.Int, ele.productId).query("UPDATE productinventory SET quantity=@productQuantity WHERE productId=@productId");
-      // };
-      //     if (err) {
-      //       if (!rolledBack) {
-      //         transaction.rollback((err) => {
-      //           // ... error checks
-      //           console.log("rollback fired transcation 2 >>>", err);
-      //         });
-      //       }
-      //     } else {
-      //       transaction.commit((err) => {
-      //         // ... error checks
-      //         console.log("commit fired transcation 2 >>>");
-      //       });
-      //     }
-      //   });
-
-      res.render("ship", {
-        title: "Ray's Grocery",
-      });
-    } catch (err) {
-      console.dir(err);
-      res.write(err + "");
-      res.end();
-    }
-  })();
 });
 
 module.exports = router;
