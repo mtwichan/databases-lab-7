@@ -1,0 +1,31 @@
+<h1 align="center">{{title}}</h1>
+
+<h2 align="center">Total Sales</h2>
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Total Sales</th>
+  </tr>
+  {{#each totalSalesData}}
+  <tr>
+    <td>{{this.orderDate}}</td>
+    <td>{{this.totalAmount}}</td>
+  </tr>
+  {{/each}}
+</table>
+
+<h2 align="center">All Customers</h2>
+<table>
+  <tr>
+    <th>Customer Id</th>
+    <th>First Name</th>
+    <th>Last Name</th>
+  </tr>
+  {{#each customersData}}
+  <tr>
+    <td>{{this.customerId}}</td>
+    <td>{{this.firstName}}</td>
+    <td>{{this.lastName}}</td>
+  </tr>
+  {{/each}}
+</table>
