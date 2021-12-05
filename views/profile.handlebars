@@ -1,0 +1,44 @@
+<h1>{{user.userid}}'s Profile</h1>
+{{#if error}}
+  <p style="color: red;">{{error}}</p>
+{{else}}
+  {{#if message}}
+    <p>{{message}}</p>
+  {{/if}}
+{{/if}}
+<form method="POST">
+  <label for="firstname">First name:</label>
+  <input id="firstname" name="firstName" type="text" placeholder="First name" value="{{user.firstName}}" />
+  <br />
+  <label for="lastname">Last name:</label>
+  <input id="lastname" name="lastName" type="text" placeholder="Last name" value="{{user.lastName}}" />
+  <br />
+  <label for="email">Email:</label>
+  <input id="email" name="email" type="text" placeholder="Email" value="{{user.email}}" />
+  <br />
+  <label for="phone">Phone number:</label>
+  <input id="phone" name="phonenum" type="text" placeholder="Phone number" value="{{user.phonenum}}" />
+  <br />
+  <label for="address">Address:</label>
+  <input id="address" name="address" type="text" placeholder="Address" value="{{user.address}}" />
+  <br />
+  <label for="city">City:</label>
+  <input id="city" name="city" type="text" placeholder="City" value="{{user.city}}" />
+  <br />
+  <label for="state">State:</label>
+  <input id="state" name="state" type="text" placeholder="State" value="{{user.state}}" />
+  <br />
+  <label for="postalcode">Postal code:</label>
+  <input name="postalCode" id="postalcode" type="text" placeholder="Postal code" value="{{user.postalCode}}" />
+  <br />
+  <label for="country">Country:</label>
+  <input id="country" name="country" type="text" placeholder="Country" value="{{user.country}}" />
+  <br />
+  <label for="username">Username:</label>
+  <input id="username" name="userid" type="text" placeholder="Username" value="{{user.userid}}" />
+  <br />
+  <label for="password">Password:</label>
+  <input id="password" name="password" type="text" placeholder="Password" value="{{user.password}}" />
+  <br />
+  <button type="submit">Update</button>
+</form>
