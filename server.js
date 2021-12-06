@@ -3,24 +3,25 @@ const exphbs = require("express-handlebars")
 const session = require("express-session")
 const bodyParser = require("body-parser")
 
-let index = require("./routes/index")
-let loadData = require("./routes/loaddata")
-let listOrder = require("./routes/listorder")
-let listProd = require("./routes/listprod")
-let addCart = require("./routes/addcart")
-let showCart = require("./routes/showcart")
-let checkout = require("./routes/checkout")
-let order = require("./routes/order")
-let login = require("./routes/login")
-let validateLogin = require("./routes/validateLogin")
-let logout = require("./routes/logout")
-let admin = require("./routes/admin")
-let product = require("./routes/product")
-let displayImage = require("./routes/displayImage")
-let customer = require("./routes/customer")
-let ship = require("./routes/ship")
-const register = require("./routes/register")
-const profile = require("./routes/profile")
+let index = require('./routes/index');
+let loadData = require('./routes/loaddata');
+let listOrder = require('./routes/listorder');
+let listProd = require('./routes/listprod');
+let addCart = require('./routes/addcart');
+let showCart = require('./routes/showcart');
+let checkout = require('./routes/checkout');
+let order = require('./routes/order');
+let login = require('./routes/login');
+let validateLogin = require('./routes/validateLogin');
+let logout = require('./routes/logout');
+let admin = require('./routes/admin');
+let product = require('./routes/product');
+let displayImage = require('./routes/displayImage');
+let customer = require('./routes/customer');
+let ship = require('./routes/ship');
+const register = require("./routes/register");
+const profile = require("./routes/profile");
+let warehouse = require("./routes/warehouse");
 
 const app = express()
 
@@ -74,24 +75,26 @@ app.use(express.static(__dirname + "/public"))
 // Setting up Express.js routes.
 // These present a "route" on the URL of the site.
 // Eg: http://127.0.0.1/loaddata
-app.use("/", index)
-app.use("/loaddata", loadData)
-app.use("/listorder", listOrder)
-app.use("/listprod", listProd)
-app.use("/addcart", addCart)
-app.use("/showcart", showCart)
-app.use("/checkout", checkout)
-app.use("/order", order)
-app.use("/login", login)
-app.use("/validateLogin", validateLogin)
-app.use("/logout", logout)
-app.use("/admin", admin)
-app.use("/product", product)
-app.use("/displayImage", displayImage)
-app.use("/customer", customer)
-app.use("/ship", ship)
-app.use("/register", register)
+
+app.use('/', index);
+app.use('/loaddata', loadData);
+app.use('/listorder', listOrder);
+app.use('/listprod', listProd);
+app.use('/addcart', addCart);
+app.use('/showcart', showCart);
+app.use('/checkout', checkout);
+app.use('/order', order);
+app.use('/login', login);
+app.use('/validateLogin', validateLogin);
+app.use('/logout', logout);
+app.use('/admin', admin);
+app.use('/product', product);
+app.use('/displayImage', displayImage);
+app.use('/customer', customer);
+app.use('/ship', ship);
+app.use("/register", register);
 app.use("/profile", profile)
+app.use("/warehouse",warehouse)
 
 // Starting our Express app
 app.listen(3000)

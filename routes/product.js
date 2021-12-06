@@ -15,7 +15,7 @@ router.get("/", function (req, res, next) {
   (async function () {
     try {
       productQuery =
-        "SELECT p.productId, FORMAT(p.productPrice, 'c') AS price, p.productName, p.productImageURL " +
+        "SELECT p.productId, FORMAT(p.productPrice, 'c') AS price, p.productName, p.productImageURL, p.productDesc " +
         "FROM product AS p " +
         "WHERE p.productId = @productId";
       urlProductId = req.query.productId;
@@ -45,6 +45,7 @@ router.get("/", function (req, res, next) {
         productId: productRow.productId,
         productPrice: productRow.price,
         urlAddCart: urlAddCart,
+        productDesc: productRow.productDesc,
       });
     } catch (err) {
       console.dir(err);

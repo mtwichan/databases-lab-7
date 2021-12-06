@@ -19,7 +19,10 @@ router.get("/", function (req, res, next) {
   }
 
   let customerId = req.query.customerId
-
+  let total = 0;
+	let subtotal = 0;
+	let ref;
+	let name;
   let customerQuery = `SELECT * FROM customer WHERE customer.customerId = @customerID`
   let orderQuery = `INSERT INTO ordersummary (customerId, orderDate, totalAmount) OUTPUT INSERTED.orderId VALUES (@customerId, @orderDate, @totalPrice)`
   let productQuery = `INSERT INTO orderproduct (orderId, productId, quantity, price) VALUES (@orderId, @productId, @quantity, @price)`
@@ -38,11 +41,12 @@ router.get("/", function (req, res, next) {
     .then(result => {
       //Determine if valid customer id was entered
       if (result.recordset.length !== 1) {
-        throw "Invalid customerID"
+        throw "Invalid customerID. Go back to the previous page and try again."
       } else if (result.recordset[0].password !== req.query.password) {
-        throw "Invalid password"
+        throw "Invalid password. Go back to the previous page and try again."
       } else {
         let customer = result.recordset[0]
+        name = customer.firstName;
         write += `<h1>${customer.firstName}'s Order</h1>\n`
         // Setting totalPrice here because it makes more sense don't take marks off
         let totalPrice = productList.filter(product => product).reduce((sum, product) => sum + product.price * product.quantity, 0)
@@ -52,16 +56,26 @@ router.get("/", function (req, res, next) {
     })
     .then(result => {
       let orderId = result.recordset[0].orderId
-
+      ref = orderId;
       return Promise.all(
         productList
           .filter(product => product)
           .map(async product => {
             try {
               /** Insert each item into OrderedProduct table using OrderId from previous INSERT **/
-              await pool.request().input("orderId", orderId).input("productId", product.id).input("quantity", product.quantity).input("price", product.price).query(productQuery)
-              write += `<h2>${product.name}</h2>\n`
-              write += `<h3>Quantity: ${product.quantity}, Price: ${product.price}</h3>\n`
+              await pool
+              .request()
+              .input("orderId", orderId)
+              .input("productId", product.id)
+              .input("quantity", product.quantity)
+              .input("price", product.price)
+              .query(productQuery)
+              write += `<h2>${product.name}</h2>\n`;
+							subtotal += Number(product.price) * Number(product.quantity);
+							write += `<h3>Quantity: ${product.quantity}, Price: ${
+								product.price
+							}, SubTotal: ${subtotal.toFixed(2)}</h3>\n`;
+							total += subtotal;
             } catch (err) {
               console.dir(err)
               write += `<h2>Error adding ${product.name} to order</h2>\n`
@@ -71,7 +85,12 @@ router.get("/", function (req, res, next) {
     })
     .then(() => {
       /** Print out order summary **/
-      res.write(write)
+      res.write(write);
+			res.write(`<h2>Total price: ${total.toFixed(2)}</h2>\n`);
+			res.write(`<h1>Order completed. Will be shipped soon...</h1>\n`);
+			res.write(`<h1>Your order reference number is: ${ref}</h1>\n`);
+			res.write(`<h1>Shipping to customer: ${name} </h1>\n`);
+			res.write("<h2><a href='/'>Back to Main Page</a></h2>");
       /** Clear session/cart **/
       req.session.destroy()
       res.end()
