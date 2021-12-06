@@ -1,0 +1,17 @@
+<h1 align="center">{{title}}</h1>
+
+<h2 align="center">Warehouses</h2>
+<table>
+  <tr>
+    <th>warehouse</th>
+    <th>product ID</th>
+    <th>Quantity</th>
+  </tr>
+  {{#each warehouseData}}
+    <tr>
+      <td>{{this.warehouseId}}</td>
+      <td>{{this.productId}}</td>
+      <td>{{this.quantity}}</td>
+    </tr>
+  {{/each}}
+</table>

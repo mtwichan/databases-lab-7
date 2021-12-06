@@ -21,6 +21,7 @@ let customer = require('./routes/customer');
 let ship = require('./routes/ship');
 const register = require("./routes/register");
 const profile = require("./routes/profile");
+let warehouse = require("./routes/warehouse");
 
 const app = express()
 
@@ -93,6 +94,7 @@ app.use('/customer', customer);
 app.use('/ship', ship);
 app.use("/register", register);
 app.use("/profile", profile)
+app.use("/warehouse",warehouse)
 
 // Starting our Express app
 app.listen(3000)
