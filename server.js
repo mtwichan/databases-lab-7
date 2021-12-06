@@ -1,7 +1,7 @@
-const express = require('express');
-const exphbs = require('express-handlebars');
-const session = require('express-session');
-const bodyParser  = require('body-parser');
+const express = require("express")
+const exphbs = require("express-handlebars")
+const session = require("express-session")
+const bodyParser = require("body-parser")
 
 let index = require('./routes/index');
 let loadData = require('./routes/loaddata');
@@ -22,36 +22,38 @@ let ship = require('./routes/ship');
 const register = require("./routes/register");
 const profile = require("./routes/profile");
 
-const app = express();
+const app = express()
 
-app.use(express.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.json())
+app.use(bodyParser.urlencoded({extended: true}))
 
 // This DB Config is accessible globally
 dbConfig = {
-  user: 'SA',
-  password: 'YourStrong@Passw0rd',
-  server: 'db',
-  database: 'tempdb',
+  user: "SA",
+  password: "YourStrong@Passw0rd",
+  server: "db",
+  database: "tempdb",
   options: {
-    'enableArithAbort': true,
-    'encrypt': false,
+    enableArithAbort: true,
+    encrypt: false
   }
 }
 
 // Setting up the session.
 // This uses MemoryStorage which is not
 // recommended for production use.
-app.use(session({
-  secret: 'COSC 304 Rules!',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: false,
-    secure: false,
-    maxAge: 60000,
-  }
-}))
+app.use(
+  session({
+    secret: "COSC 304 Rules!",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: false,
+      secure: false,
+      maxAge: 60000
+    }
+  })
+)
 
 // const hbs = exphbs.create(
 //   {
@@ -62,16 +64,17 @@ app.use(session({
 // )
 
 // Setting up the rendering engine
-app.engine('handlebars', exphbs());
-app.set('view engine', 'handlebars');
+app.engine("handlebars", exphbs())
+app.set("view engine", "handlebars")
 
 // Setting up where static assets should
 // be served from.
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + "/public"))
 
 // Setting up Express.js routes.
 // These present a "route" on the URL of the site.
 // Eg: http://127.0.0.1/loaddata
+
 app.use('/', index);
 app.use('/loaddata', loadData);
 app.use('/listorder', listOrder);
