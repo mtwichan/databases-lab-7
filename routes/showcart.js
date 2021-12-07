@@ -1,31 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-router.get('/', function(req, res, next) {
-    let productList = false;
-    let pool;
-    res.setHeader('Content-Type', 'text/html');
-    res.write("<title>Your Shopping Cart</title>");
-    res.write(
+router.get("/", function (req, res, next) {
+	let productList = false;
+	let pool;
+	res.setHeader("Content-Type", "text/html");
+	res.write('<h1 align="center">BankRank\'s Grocery</h1>');
+	res.write("<hr>\n");
+	res.write(
 		"<script>function update(newid, newqty) {\n" +
 			'   window.location="showcart?update=" +newid + "&newqty=" + newqty;\n' +
 			"}</script>\n"
 	);
-    if (req.session.productList) {
-        productList = req.session.productList;
-        res.write('<form name="form1">\n');
+	if (req.session.productList) {
+		productList = req.session.productList;
+		res.write('<form name="form1">\n');
 		res.write("<h1>Your Shopping Cart</h1>");
 		res.write(
 			"<table><tr><th>Product Id</th><th>Product Name</th><th>Quantity</th>"
 		);
 		res.write("<th>Price</th><th>Subtotal</th></tr>");
 
-
-        let total = 0;
-        let deleteprod;
+		let total = 0;
+		let deleteprod;
 		let update, newqty;
-
-        if (req.query.delete) {
+		if (req.query.delete) {
 			deleteprod = req.query.delete;
 			for (let i = 0; i < productList.length; i++) {
 				product = productList[i];
@@ -39,7 +38,7 @@ router.get('/', function(req, res, next) {
 			}
 		}
 
-        if (req.query.update && req.query.newqty) {
+		if (req.query.update && req.query.newqty) {
 			update = req.query.update;
 			newqty = req.query.newqty;
 			for (let i = 0; i < productList.length; i++) {
@@ -53,7 +52,7 @@ router.get('/', function(req, res, next) {
 			}
 		}
 
-        for (let i = 0; i < productList.length; i++) {
+		for (let i = 0; i < productList.length; i++) {
 			product = productList[i];
 			if (!product) {
 				continue;
@@ -94,16 +93,20 @@ router.get('/', function(req, res, next) {
 			res.write("</tr>\n\n");
 			total = total + product.quantity * product.price;
 		}
-        res.write("<tr><td colspan=\"4\" align=\"right\"><b>Order Total</b></td><td align=\"right\">$" + total.toFixed(2) + "</td></tr>");
-        res.write("</table>");
+		res.write(
+			'<tr><td colspan="4" align="right"><b>Order Total</b></td><td align="right">$' +
+				total.toFixed(2) +
+				"</td></tr>"
+		);
+		res.write("</table>");
 
-        res.write("<h2><a href=\"checkout\">Check Out</a></h2>");
-    } else{
-        res.write("<h1>Your shopping cart is empty!</h1>");
-    }
-    res.write('<h2><a href="listprod">Continue Shopping</a></h2>');
-    res.write("</form>");
-    res.end();
+		res.write('<h2><a href="payment">Check Out</a></h2>');
+	} else {
+		res.write("<h1>Your shopping cart is empty!</h1>");
+	}
+	res.write('<h2><a href="listprod">Continue Shopping</a></h2>');
+	res.write("</form>");
+	res.end();
 });
 
 module.exports = router;

@@ -22,6 +22,7 @@ let ship = require('./routes/ship');
 const register = require("./routes/register");
 const profile = require("./routes/profile");
 let warehouse = require("./routes/warehouse");
+let payment = require("./routes/payment");
 
 const app = express()
 
@@ -93,8 +94,9 @@ app.use('/displayImage', displayImage);
 app.use('/customer', customer);
 app.use('/ship', ship);
 app.use("/register", register);
-app.use("/profile", profile)
-app.use("/warehouse",warehouse)
+app.use("/profile", profile);
+app.use("/warehouse",warehouse);
+app.use("/payment",payment);
 
 // Starting our Express app
 app.listen(3000)
