@@ -1,11 +1,22 @@
 <h1 align="center">{{title}}</h1>
-<hr>
+<hr />
 <h2>{{productName}}</h2>
-<img src={{urlProductImg}} width="500", height="500">
-<img src={{urlProductImgBinary}} width="500", height="500">
+<img src={{urlProductImg}} width="500" , height="500" />
+<img src={{urlProductImgBinary}} width="500" , height="500" />
 <p><b>ID:</b> {{productId}}</p>
 <p><b>Price:</b> {{productPrice}}</p>
 <p><b>Description:</b> {{productDesc}}</p>
-<br>
+<br />
 <h3><a href={{urlAddCart}}>Add to Cart</a></h3>
 <h3><a href="/listprod">Continue Shopping</a></h3>
+{{#if auth}}
+  {{#if error}}
+    <h3>{{error}}</h3>
+  {{/if}}
+  <h3>Review</h3>
+  <form method="POST">
+    <textarea name="review" maxlength="500"></textarea>
+    <input type="number" name="rating" min="1" max="5" value="1" />
+    <button>Submit</button>
+  </form>
+{{/if}}
